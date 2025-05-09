@@ -47,7 +47,7 @@ def load_excel_file():
     # Read the Excel file
     try:
         # data = pd.read_excel(file_name)
-        data = pd.read_excel(file_name).head(10)
+        data = pd.read_excel(file_name).head(20)
 
         return data  # Return the DataFrame
     except FileNotFoundError:
@@ -134,7 +134,8 @@ if __name__ == "__main__":
         print("File loaded successfully!")
 
         # Chunk the data
-        chunks = chunk_text(df)
+        # chunks = chunk_text(df)
+        chunks = chunk_text(df[['doc_text']])
         print(f"Data chunked into {len(chunks)} pieces.")
 
         # Store chunks in ChromaDB
