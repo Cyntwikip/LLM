@@ -16,12 +16,6 @@ AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
 AZURE_OPENAI_DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
 AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION", "2024-02-01")
 
-# Configure OpenAI for Azure
-openai.api_type = "azure"
-openai.api_base = AZURE_OPENAI_ENDPOINT
-openai.api_key = AZURE_OPENAI_API_KEY
-openai.api_version = AZURE_OPENAI_API_VERSION
-
 # Initialize Azure OpenAI client
 azure_openai_client = AzureOpenAI(
     api_version=AZURE_OPENAI_API_VERSION,
