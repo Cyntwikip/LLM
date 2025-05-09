@@ -15,7 +15,7 @@ load_dotenv()
 # Azure OpenAI API configuration
 AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
 AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
-AZURE_OPENAI_DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME", "text-embedding-3-small")
+AZURE_OPENAI_DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
 AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION", "2024-02-01")
 
 # Initialize Azure OpenAI client
@@ -77,8 +77,23 @@ def embed_texts_azure(texts):
         return embeddings
     except Exception as e:
         raise Exception(f"Azure OpenAI API error: {e}")
+    
+def embed_texts_chromadb(texts):
+    """
+    Generate embeddings for a list of texts using ChromaDB's innate embedding function.
+    """
+    print("Using ChromaDB's innate embedding function...")
+    try:
+        # Initialize ChromaDB's embedding function
+        embedding_function = embedding_functions.DefaultEmbeddingFunction()
 
-def store_chunks_in_chromadb(chunks):
+        # Generate embeddings for all texts
+        embeddings = embedding_function(texts)
+        return embeddings
+    except Exception as e:
+        raise Exception(f"ChromaDB embedding error: {e}")
+
+def store_chunks_in_chromadb(chunks, use_azure=True):
     """
     Store text chunks and their embeddings in ChromaDB.
     """
@@ -91,16 +106,15 @@ def store_chunks_in_chromadb(chunks):
         chroma_client.delete_collection(name=collection_name)
         
     collection = chroma_client.get_or_create_collection(
-        name=collection_name,
-        embedding_function=embedding_functions.OpenAIEmbeddingFunction(
-            api_key=AZURE_OPENAI_API_KEY,
-            model_name=AZURE_OPENAI_DEPLOYMENT_NAME  # This is still used for compatibility with ChromaDB
-        )
+        name=collection_name
     )
 
     # Generate embeddings for all chunks at once
     print("Generating embeddings for all chunks...")
-    embeddings = embed_texts_azure(chunks)
+    if use_azure:
+        embeddings = embed_texts_azure(chunks)
+    else:
+        embeddings = embed_texts_chromadb(chunks)
 
     # Add chunks and their embeddings to the collection
     print("Storing chunks and embeddings in ChromaDB...")
