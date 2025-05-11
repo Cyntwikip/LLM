@@ -1,4 +1,4 @@
-### README: Basic MCP Tutorial
+## Basic MCP Tutorial
 
 This tutorial provides a step-by-step guide to set up and run a basic MCP (Model Context Protocol) server and client using the `FastMCP` library.
 
