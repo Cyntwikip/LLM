@@ -129,9 +129,10 @@ def fetch_rss_feed():
                 "Publication Date": pub_date
             })
 
-        # Create a Pandas DataFrame
-        df = pd.DataFrame(feed_data)
-        return df
+        # # Create a Pandas DataFrame
+        # df = pd.DataFrame(feed_data)
+        # return df
+        return feed_data
 
     except Exception as e:
         print(f"Error fetching RSS feed: {e}")

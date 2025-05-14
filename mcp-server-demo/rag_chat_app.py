@@ -9,6 +9,8 @@ from openai import AzureOpenAI
 import asyncio
 from fastmcp import Client
 
+print("CURRENT DIRECTORY:", os.getcwd())
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -18,6 +20,8 @@ AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
 AZURE_OPENAI_DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
 AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION", "2024-02-01")
 AZURE_OPENAI_CHAT_DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT_NAME")
+
+print('Python openai version:', openai.__version__)
 
 # Initialize Azure OpenAI client
 azure_openai_client = AzureOpenAI(
@@ -115,7 +119,7 @@ async def process_query(query: str) -> str:
             )
 
             print('---Azure OpenAI response---')
-            print(response)
+            # print(response)
 
             final_text = None
 
@@ -125,7 +129,7 @@ async def process_query(query: str) -> str:
 
                 # Extract the assistant's response
                 assistant_response = response.choices[0].message.content
-                print(assistant_response)
+                # print(assistant_response)
                 # final_text = [assistant_response]
                 final_text = assistant_response
 

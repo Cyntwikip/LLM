@@ -142,3 +142,118 @@ This tutorial covered:
 - Interacting with the server using a client script.
 
 Feel free to extend the server with additional tools, resources, and prompts to suit your needs!
+
+---
+
+## Debugging Guide for MCP Server with Streamlit
+
+This section provides a step-by-step guide to enable debugging for your Streamlit application (`rag_chat_app.py`) using the Python Debugger in Visual Studio Code.
+
+---
+
+### Prerequisites
+
+1. **Install the Python Extension**:
+   - Open Visual Studio Code.
+   - Go to the Extensions view (`Ctrl+Shift+X` or `Cmd+Shift+X` on macOS).
+   - Search for and install the **Python** extension by Microsoft.
+
+2. **Ensure Your Virtual Environment is Set Up**:
+   - Activate your virtual environment:
+     ```bash
+     source .venv/bin/activate  # On macOS/Linux
+     .venv\Scripts\activate     # On Windows
+     ```
+
+---
+
+### Setting Up Debugging in VS Code
+
+1. **Create or Update `launch.json`**:
+   - Open the **Run and Debug** panel (`Ctrl+Shift+D` or `Cmd+Shift+D` on macOS).
+   - Click **"Create a launch.json file"** if you don’t already have one.
+   - Add the following configuration to your `launch.json` file:
+
+   ```jsonc
+   {
+       "version": "0.2.0",
+       "configurations": [
+           {
+               "name": "Streamlit: Debug Current File",
+               "type": "python",
+               "request": "launch",
+               "cwd": "${workspaceFolder}/LLM Materials/LLM/mcp-server-demo", // Set working directory to the folder with .env
+               "env": {
+                   "PYTHONPATH": "${workspaceFolder}/LLM Materials/LLM/mcp-server-demo/.venv/bin"
+               },
+               "pythonPath": "${workspaceFolder}/LLM Materials/LLM/mcp-server-demo/.venv/bin/python", // Explicitly set Python interpreter
+               "program": "${workspaceFolder}/LLM Materials/LLM/mcp-server-demo/.venv/bin/streamlit", // Path to Streamlit in .venv
+               "args": [
+                   "run",
+                   "${file}"
+               ],
+               "console": "integratedTerminal",
+               "justMyCode": false
+           }
+       ]
+   }
+   ```
+
+2. **Explanation of Configuration**:
+   - **`cwd`**: Sets the working directory to the folder containing your `.env` file.
+   - **`env`**: Ensures the `PYTHONPATH` includes the `.venv` folder.
+   - **`pythonPath`**: Explicitly points to the Python interpreter in your `.venv`.
+   - **`program`**: Specifies the `streamlit` executable inside your `.venv`.
+   - **`args`**: Passes the `run` command and the currently open file (`${file}`) to Streamlit.
+
+---
+
+### Running the Debugger
+
+1. **Open the File**:
+   - Open `rag_chat_app.py` in Visual Studio Code.
+
+2. **Set Breakpoints**:
+   - Click to the left of the line numbers to set breakpoints where you want to pause execution.
+
+3. **Select the Debug Configuration**:
+   - Go to the **Run and Debug** panel.
+   - Select **"Streamlit: Debug Current File"** from the dropdown.
+
+4. **Start Debugging**:
+   - Press **F5** or click the green "Run" button to start debugging.
+
+5. **Inspect Variables and Step Through Code**:
+   - Use the **Debug Console** to inspect variables.
+   - Use the **Step Over (F10)**, **Step Into (F11)**, and **Continue (F5)** buttons to navigate through the code.
+
+---
+
+### Notes
+
+- **Ensure the Correct File is Selected**:
+  - Make sure `rag_chat_app.py` is the active file when running the debugger.
+
+- **Restart VS Code if Necessary**:
+  - If the debugger doesn’t work as expected, restart VS Code to apply the changes.
+
+- **Verify the Python Interpreter**:
+  - Open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on macOS).
+  - Search for **"Python: Select Interpreter"** and ensure the interpreter points to your `.venv`.
+
+---
+
+### Example Debugging Workflow
+
+1. Set a breakpoint at the following line in `rag_chat_app.py`:
+   ```python
+   print("CURRENT DIRECTORY:", os.getcwd())
+   ```
+
+2. Start the debugger and observe the output in the **Debug Console**.
+
+3. Step through the code to inspect the values of variables like `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_API_KEY`.
+
+4. Use the **Debug Console** to execute commands and test variable values.
+
+---
