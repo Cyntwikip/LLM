@@ -30,6 +30,11 @@ azure_openai_client = AzureOpenAI(
     api_key=AZURE_OPENAI_API_KEY
 )
 
+MAX_HISTORY_LENGTH = 10
+
+if "message_history" not in st.session_state:
+    st.session_state.message_history = []  
+
 # MCP server URL
 SERVER_URL = "http://127.0.0.1:8081/mcp"
 
@@ -69,6 +74,7 @@ def convert_mcp_tools_to_openai_format(tools):
 
 async def process_query(query: str) -> str:
     """Process a query using Azure OpenAI and available tools from the MCP server."""
+
     async with Client(SERVER_URL) as client:
         print('---Connected to server---')
 
@@ -83,15 +89,23 @@ async def process_query(query: str) -> str:
             {"role": "user", "content": query}
         ]
 
+        messages = st.session_state.message_history + messages
+        messages = messages[-MAX_HISTORY_LENGTH:]
+
+        past_tool_choices = []
+
         try:
             while True:
+                filtered_available_tools = [i for i in available_tools 
+                                if i['function']['name'] not in past_tool_choices]
+
                 # Call Azure OpenAI for text completion
                 response = azure_openai_client.chat.completions.create(
                     model=AZURE_OPENAI_CHAT_DEPLOYMENT_NAME,
                     messages=messages,
                     max_tokens=1000,
                     temperature=0.7,
-                    tools=available_tools,
+                    tools=filtered_available_tools,
                     tool_choice="auto"
                 )
 
@@ -101,6 +115,8 @@ async def process_query(query: str) -> str:
                     # Extract the assistant's response
                     final_text = response.choices[0].message.content
                     messages.append({"role": "assistant", "content": final_text})
+
+                    st.session_state.message_history = messages
                     return final_text
 
                 elif response.choices[0].finish_reason == "tool_calls":
@@ -108,9 +124,10 @@ async def process_query(query: str) -> str:
                     content = response.choices[0].message.tool_calls[0]
                     tool_choice = content.function.name
                     print('Tool choice:', tool_choice)
+                    past_tool_choices.append(tool_choice)
 
                     # Find the tool and execute it
-                    for tool in available_tools:
+                    for tool in filtered_available_tools:
                         if tool['function']['name'] == tool_choice:
                             tool_name = tool['function']['name']
                             tool_args = eval(content.function.arguments)
@@ -129,36 +146,6 @@ async def process_query(query: str) -> str:
         except Exception as e:
             print(e)
             raise Exception(f"Error during Azure OpenAI completion or tool execution: {e}")
-
-# def summarize_results(query, documents):
-#     """
-#     Summarize the retrieved documents in the context of the query using Azure OpenAI's GPT model.
-#     """
-#     try:
-#         # Prepare the prompt for summarization
-#         prompt = f"""
-#         You are an assistant that summarizes information in the context of a user's query.
-#         Query: {query}
-#         Relevant Information:
-#         {documents}
-#         Provide a concise summary of the relevant information in the context of the query.
-#         """
-
-#         # Call Azure OpenAI GPT model for summarization
-#         response = azure_openai_client.chat.completions.create(
-#             model=AZURE_OPENAI_CHAT_DEPLOYMENT_NAME,  # Use the GPT deployment name
-#             messages=[
-#                 {"role": "system", "content": "You are a helpful assistant."},
-#                 {"role": "user", "content": prompt}
-#             ]
-#         )
-
-#         # Extract and return the summary
-#         return response.choices[0].message.content
-#     except Exception as e:
-#         raise Exception(f"Azure OpenAI GPT summarization error: {e}")
-
-# print('TEST')
 
 # Streamlit App
 st.title("Conversational RAG App with MCP Server")
