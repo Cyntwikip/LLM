@@ -1,0 +1,13 @@
+version: '1'
+services:
+  mcp-server:
+    build: .
+    command: python server_rag.py --server.port=8081 --server.address=0.0.0.0
+    ports:
+      - "8081:8081"
+
+  mcp-client:
+    build: .
+    command: streamlit run rag_chat_app_v2.py --server.port=8501 --server.address=0.0.0.0
+    ports:
+      - "8501:8501"
