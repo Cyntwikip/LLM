@@ -12,4 +12,5 @@ dependencies = [
     "numpy>=2.2.5",
     "openai>=1.78.0",
     "pandas>=2.2.3",
+    "streamlit>=1.45.0",
 ]
