@@ -37,7 +37,7 @@ if "message_history" not in st.session_state:
 
 # MCP server URL
 # SERVER_URL = "http://127.0.0.1:8081/mcp"
-SERVER_URL = os.getenv("MCP_SERVER_URL")
+SERVER_URL = os.getenv("MCP_SERVER_URL", "http://mcp-server:8081/mcp") # default is for docker implementation
 
 async def connect_server():
     # Connect to the MCP server
