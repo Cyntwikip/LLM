@@ -21,6 +21,16 @@ AZURE_OPENAI_DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
 AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION", "2024-02-01")
 AZURE_OPENAI_CHAT_DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT_NAME")
 
+DATABRICKS_TOKEN = os.getenv('DATABRICKS_TOKEN')
+DATABRICKS_HOST = os.getenv('DATABRICKS_HOST')
+DATABRICKS_SQL_WAREHOUSE_ID = os.getenv('DATABRICKS_SQL_WAREHOUSE_ID')
+
+RSS_FEED_URL = os.getenv('RSS_FEED_URL')
+DATABRICKS_SQL_STATEMENT = os.getenv('DATABRICKS_SQL_STATEMENT')
+DATABRICKS_CATALOG = os.getenv('DATABRICKS_CATALOG')
+DATABRICKS_SCHEMA = os.getenv('DATABRICKS_SCHEMA')
+RELEVANT_COLUMNS = os.getenv('RELEVANT_COLUMNS')
+
 # Initialize Azure OpenAI client
 azure_openai_client = AzureOpenAI(
     api_version=AZURE_OPENAI_API_VERSION,
@@ -85,12 +95,12 @@ def get_travel_locations():
     log_text = response.text
     df = parse_log(log_text)
 
-    return df
+    return df.to_json(orient="records")
 
 @mcp.tool()
 def fetch_rss_feed():
     """
-    Fetches an RSS feed from a ADB and parses it into a structured format.
+    Fetches an RSS feed from a predefined URL and parses it into a structured format.
 
     The function retrieves the RSS feed, parses the XML data, and extracts relevant fields 
     such as title, link, description, and publication date. The extracted data is returned 
@@ -103,7 +113,7 @@ def fetch_rss_feed():
                     - "Description": The description of the RSS feed item.
                     - "Publication Date": The publication date of the RSS feed item.
     """
-    feed_url = 'https://feeds.feedburner.com/adb_news'
+    feed_url = RSS_FEED_URL
 
     try:
         response = requests.get(feed_url)
@@ -207,14 +217,14 @@ def summarize_results(query, documents):
 @mcp.tool()
 def fetch_rag_data(query: str, top_k: int = 5):
     """
-    Fetch and summarize relevant data from ChromaDB based on the user's query.
+    Fetch relevant document insights from RAG database based on the user's query.
 
     Args:
         query (str): The user's query to search for relevant data.
         top_k (int): The number of top results to retrieve from ChromaDB.
 
     Returns:
-        str: A summary of the relevant data retrieved from ChromaDB.
+        list: List of relevant document insights retrieved from database.
     """
     # Query ChromaDB for relevant chunks
     results = query_chromadb(query, top_k)
@@ -230,7 +240,47 @@ def fetch_rag_data(query: str, top_k: int = 5):
     # # Summarize the results
     # summary = summarize_results(user_query, documents)
 
+    # results = pd.DataFrame(results).to_json(orient="records")
+
     return results
+
+@mcp.tool()
+def fetch_careers():
+    """
+    Fetches the latest career positions from the database.
+
+    The response returns the following columns:
+    {RELEVANT_COLUMNS}.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the selected columns from the query result if successful.
+        None: If the API request fails.
+    """
+    endpoint = f"https://{DATABRICKS_HOST}/api/2.0/sql/statements/"
+    headers = {"Authorization": f"Bearer {DATABRICKS_TOKEN}", "Content-Type": "application/json"}
+    body = {
+                "warehouse_id": f"{DATABRICKS_SQL_WAREHOUSE_ID}",
+                "catalog": DATABRICKS_CATALOG,
+                "schema": DATABRICKS_SCHEMA,
+                "statement": DATABRICKS_SQL_STATEMENT
+            }
+
+    response = requests.post(url=endpoint, headers=headers, json=body)
+
+    if response.status_code == 200:
+        print("Query submitted successfully.")
+        result = response.json()
+
+        columns = [i['name'] for i in result['manifest']['schema']['columns']]
+        result = pd.DataFrame(result['result']['data_array'], columns=columns)
+
+        relevant_columns = RELEVANT_COLUMNS.split(',')
+        result = result[relevant_columns].to_json(orient="records")
+        return result
+    else:
+        print(f"Error: {response.status_code} - {response.text}")
+        return None
+
 
 # Start the server
 if __name__ == "__main__":
@@ -238,7 +288,8 @@ if __name__ == "__main__":
         print("Debug: Starting MCP server...", file=sys.stderr)
         mcp.run(
             transport="streamable-http",
-            host="127.0.0.1",
+            # host="127.0.0.1", # for local testing
+            host="0.0.0.0",
             port=8081,
             path="/mcp",
             log_level="debug",
