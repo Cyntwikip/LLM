@@ -1,0 +1,13 @@
+source,law_name,ra_number,date_signed,signed_by,note
+National Privacy Commission,Data Privacy Act of 2012,10173,2012-08-15,Benigno Aquino III,
+Cybercrime Prevention Act of 2012,Cybercrime Prevention Act of 2012,10175,2012-09-12,Benigno Aquino III,
+Disini v. Secretary of Justice,Cybercrime Prevention Act of 2012,,,,"A court case: the article never states the RA number or signing date, so null is correct"
+Universal Access to Quality Tertiary Education Act,Universal Access to Quality Tertiary Education Act,10931,2017-08-03,,"The article gives the date but not who signed it (it was Rodrigo Duterte), so null is the faithful answer"
+SIM Registration Act,SIM Registration Act,11934,2022-10-10,Bongbong Marcos,
+Safe Spaces Act,Safe Spaces Act,11313,2019-04-17,Rodrigo Duterte,
+Universal Health Care Act (Philippines),Universal Health Care Act,11223,2019-02-20,Rodrigo Duterte,
+Anti-Hazing Act of 2018,Anti-Hazing Act of 2018,11053,2018-06-29,Rodrigo Duterte,
+Philippine Identification System Act,Philippine Identification System Act,11055,2018-08-06,Rodrigo Duterte,
+E-Governance Act,E-Governance Act,12254,2025-09-05,Bongbong Marcos,
+Konektadong Pinoy Act,Konektadong Pinoy Act,12234,,,Never signed: it lapsed into law without the President's signature on 2025-08-24
+Philippine Competition Act,Philippine Competition Act,10667,2015-07-21,Benigno Aquino III,
